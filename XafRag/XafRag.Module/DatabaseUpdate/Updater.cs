@@ -100,6 +100,8 @@ namespace XafRag.Module.DatabaseUpdate
                 defaultRole.AddObjectPermission<ModelDifferenceAspect>(SecurityOperations.ReadWriteAccess, "Owner.UserId = ToStr(CurrentUserId())", SecurityPermissionState.Allow);
                 defaultRole.AddTypePermissionsRecursively<ModelDifference>(SecurityOperations.Create, SecurityPermissionState.Allow);
                 defaultRole.AddTypePermissionsRecursively<ModelDifferenceAspect>(SecurityOperations.Create, SecurityPermissionState.Allow);
+                defaultRole.AddTypePermissionsRecursively<KnowledgeArticle>(SecurityOperations.CRUDAccess, SecurityPermissionState.Allow);
+                defaultRole.AddTypePermissionsRecursively<Document>(SecurityOperations.CRUDAccess, SecurityPermissionState.Allow);
             }
             return defaultRole;
         }

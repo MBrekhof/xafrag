@@ -37,6 +37,8 @@ namespace XafRag.Module
             AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.EF.FileData));
             AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.EF.FileAttachment));
             AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.EF.HCategory));
+            AdditionalExportedTypes.Add(typeof(XafRag.Module.BusinessObjects.KnowledgeArticle));
+            AdditionalExportedTypes.Add(typeof(XafRag.Module.BusinessObjects.Document));
         }
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB)
         {

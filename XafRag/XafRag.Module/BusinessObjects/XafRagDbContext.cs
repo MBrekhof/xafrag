@@ -23,6 +23,8 @@ namespace XafRag.Module.BusinessObjects
         public DbSet<FileData> FileData { get; set; }
         public DbSet<ReportDataV2> ReportDataV2 { get; set; }
         public DbSet<HCategory> HCategories { get; set; }
+        public DbSet<KnowledgeArticle> KnowledgeArticles { get; set; }
+        public DbSet<Document> Documents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -1,4 +1,5 @@
-﻿using DevExpress.ExpressApp.ApplicationBuilder;
+﻿using DevExpress.AIIntegration;
+using DevExpress.ExpressApp.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;
@@ -13,10 +14,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.AI;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Npgsql;
+using OpenAI;
 using System.Text;
+using XafRag.Blazor.Server.Configuration;
 using XafRag.Blazor.Server.Services;
+using XafRag.Module.BusinessObjects;
 using XafRag.WebApi.JWT;
 
 namespace XafRag.Blazor.Server
@@ -36,6 +42,51 @@ namespace XafRag.Blazor.Server
         {
             // https://www.npgsql.org/doc/types/datetime.html#timestamps-and-timezones
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
+            // RagDbContext for vector operations (separate from XAF's DbContext)
+            var ragConnectionString = Configuration.GetConnectionString("ConnectionString")!
+                .Replace("EFCoreProvider=Postgres;", "");
+            var npgsqlDataSourceBuilder = new NpgsqlDataSourceBuilder(ragConnectionString);
+            npgsqlDataSourceBuilder.UseVector();
+            var npgsqlDataSource = npgsqlDataSourceBuilder.Build();
+
+            services.AddDbContext<RagDbContext>((sp, options) =>
+            {
+                options.UseNpgsql(npgsqlDataSource, o => o.UseVector());
+            });
+
+            // Configuration
+            services.Configure<OpenAiOptions>(Configuration.GetSection(OpenAiOptions.SectionName));
+            services.Configure<RagOptions>(Configuration.GetSection(RagOptions.SectionName));
+
+            // OpenAI clients
+            var openAiApiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY")
+                ?? throw new InvalidOperationException("OPENAI_API_KEY environment variable is not set.");
+            var openAiOptions = Configuration.GetSection(OpenAiOptions.SectionName).Get<OpenAiOptions>()!;
+            var openAiClient = new OpenAIClient(openAiApiKey);
+
+            // Chat client (for DxAIChat and RagService)
+            IChatClient chatClient = openAiClient
+                .GetChatClient(openAiOptions.ChatModel)
+                .AsIChatClient();
+            services.AddChatClient(chatClient);
+
+            // Embedding generator
+            IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator = openAiClient
+                .GetEmbeddingClient(openAiOptions.EmbeddingModel)
+                .AsIEmbeddingGenerator();
+            services.AddSingleton(embeddingGenerator);
+
+            // DevExpress AI services
+            services.AddDevExpressBlazor();
+            services.AddDevExpressAI();
+
+            // RAG services
+            services.AddScoped<ChunkingService>();
+            services.AddScoped<EmbeddingService>();
+            services.AddScoped<DocumentProcessingService>();
+            services.AddScoped<RagService>();
+            services.AddSingleton<IngestionService>();
 
             services.AddSingleton(typeof(Microsoft.AspNetCore.SignalR.HubConnectionHandler<>), typeof(ProxyHubConnectionHandler<>));
 
@@ -237,6 +288,12 @@ namespace XafRag.Blazor.Server
             app.UseAuthorization();
             app.UseAntiforgery();
             app.UseXaf();
+            // Ensure RAG database schema exists
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                var ragDb = scope.ServiceProvider.GetRequiredService<RagDbContext>();
+                ragDb.Database.EnsureCreated();
+            }
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapXafEndpoints();

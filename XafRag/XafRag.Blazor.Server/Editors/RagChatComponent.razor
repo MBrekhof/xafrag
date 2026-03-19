@@ -1,0 +1,65 @@
+@namespace XafRag.Blazor.Server.Editors
+@using DevExpress.AIIntegration.Blazor.Chat
+@using Markdig
+@using Ganss.Xss
+@inject XafRag.Blazor.Server.Services.RagService RagService
+
+<DxAIChat CssClass="rag-chat"
+          UseStreaming="false"
+          ResponseContentFormat="ResponseContentFormat.Markdown"
+          MessageSent="OnMessageSent">
+    <MessageContentTemplate>
+        <div class="rag-chat-content">
+            @ToHtml(context.Content)
+        </div>
+    </MessageContentTemplate>
+    <EmptyMessageAreaTemplate>
+        <div class="rag-chat-empty">
+            <h3>Knowledge Base Assistant</h3>
+            <p>Ask questions about your knowledge base. I'll search for relevant information and provide answers based on your articles and documents.</p>
+        </div>
+    </EmptyMessageAreaTemplate>
+</DxAIChat>
+
+<style>
+    .rag-chat {
+        width: 100%;
+        height: calc(100vh - 200px);
+        min-height: 400px;
+    }
+    .rag-chat-content > p:last-child {
+        margin-bottom: 0;
+    }
+    .rag-chat-empty {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+    }
+</style>
+
+@code {
+    private readonly HtmlSanitizer _sanitizer = new();
+
+    private async Task OnMessageSent(MessageSentEventArgs args)
+    {
+        var question = args.Content;
+        var responseBuilder = new System.Text.StringBuilder();
+
+        await foreach (var chunk in RagService.AskAsync(question, ct: args.CancellationToken))
+        {
+            responseBuilder.Append(chunk);
+        }
+
+        await args.Chat.SendMessage(responseBuilder.ToString(), Microsoft.Extensions.AI.ChatRole.Assistant);
+    }
+
+    private MarkupString ToHtml(string markdown)
+    {
+        if (string.IsNullOrEmpty(markdown))
+            return new MarkupString(string.Empty);
+
+        var html = Markdown.ToHtml(markdown);
+        html = _sanitizer.Sanitize(html);
+        return new MarkupString(html);
+    }
+}

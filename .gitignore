@@ -1,0 +1,8 @@
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.csproj.user
+appsettings.Development.json
+excalidraw.log

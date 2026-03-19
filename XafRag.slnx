@@ -1,0 +1,9 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="EasyTest" />
+    <BuildType Name="Release" />
+  </Configurations>
+  <Project Path="XafRag/XafRag.Blazor.Server/XafRag.Blazor.Server.csproj" />
+  <Project Path="XafRag/XafRag.Module/XafRag.Module.csproj" />
+</Solution>

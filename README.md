@@ -1,8 +1,8 @@
 # XafRag — RAG Sample for DevExpress XAF
 
-XafRag is a tutorial and reference implementation showing how to add Retrieval-Augmented Generation (RAG) to a [DevExpress XAF](https://www.devexpress.com/products/net/application_framework/) Blazor Server application. It uses PostgreSQL with the PGVector extension to store and query vector embeddings, OpenAI to generate embeddings and LLM responses, and the DevExpress `DxAIChat` component to provide a polished in-app chat interface — all wired together through `Microsoft.Extensions.AI` abstractions.
+![Architecture Diagram](docs/architecture.png)
 
-See `docs/architecture.png` for the visual architecture diagram.
+XafRag is a tutorial and reference implementation showing how to add Retrieval-Augmented Generation (RAG) to a [DevExpress XAF](https://www.devexpress.com/products/net/application_framework/) Blazor Server application. It uses PostgreSQL with the PGVector extension to store and query vector embeddings, OpenAI to generate embeddings and LLM responses, and the DevExpress `DxAIChat` component to provide a polished in-app chat interface — all wired together through `Microsoft.Extensions.AI` abstractions.
 
 ---
 

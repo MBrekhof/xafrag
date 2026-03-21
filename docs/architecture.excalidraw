@@ -6,371 +6,405 @@
     {
       "id": "title",
       "type": "text",
-      "x": 220,
+      "x": 250,
       "y": 10,
-      "text": "XAF RAG Architecture",
+      "text": "XafRag — RAG Architecture",
       "fontSize": 28,
       "fontFamily": 2,
-      "createdAt": "2026-03-19T17:25:53.682Z",
-      "updatedAt": "2026-03-19T17:25:53.682Z",
+      "createdAt": "2026-03-21T07:56:05.825Z",
+      "updatedAt": "2026-03-21T07:56:05.825Z",
       "version": 1
     },
     {
-      "id": "ui-zone",
+      "id": "blazor-zone",
       "type": "rectangle",
-      "x": 40,
-      "y": 60,
-      "width": 880,
-      "height": 130,
-      "backgroundColor": "#e3f2fd",
-      "strokeColor": "#1976d2",
+      "x": 30,
+      "y": 70,
+      "width": 900,
+      "height": 420,
+      "backgroundColor": "#e8f4fd",
+      "strokeColor": "#1971c2",
+      "strokeWidth": 1,
       "roughness": 0,
       "opacity": 40,
-      "createdAt": "2026-03-19T17:25:53.682Z",
-      "updatedAt": "2026-03-19T17:25:53.682Z",
+      "createdAt": "2026-03-21T07:56:05.825Z",
+      "updatedAt": "2026-03-21T07:56:05.825Z",
       "version": 1
     },
     {
-      "id": "ui-label",
+      "id": "blazor-label",
       "type": "text",
-      "x": 55,
-      "y": 68,
-      "strokeColor": "#1976d2",
-      "text": "UI Layer (XAF Blazor Server)",
-      "fontSize": 14,
-      "fontFamily": 2,
-      "createdAt": "2026-03-19T17:25:53.683Z",
-      "updatedAt": "2026-03-19T17:25:53.683Z",
-      "version": 1
-    },
-    {
-      "id": "chat",
-      "type": "rectangle",
-      "x": 70,
-      "y": 105,
-      "width": 200,
-      "height": 60,
-      "backgroundColor": "#bbdefb",
-      "roughness": 0,
-      "label": {
-        "text": "DxAIChat"
-      },
-      "fontSize": 18,
-      "fontFamily": 2,
-      "createdAt": "2026-03-19T17:25:53.683Z",
-      "updatedAt": "2026-03-19T17:25:53.683Z",
-      "version": 1
-    },
-    {
-      "id": "article-view",
-      "type": "rectangle",
-      "x": 350,
-      "y": 105,
-      "width": 240,
-      "height": 60,
-      "backgroundColor": "#bbdefb",
-      "roughness": 0,
-      "label": {
-        "text": "Knowledge Articles"
-      },
+      "x": 50,
+      "y": 80,
+      "strokeColor": "#1971c2",
+      "text": "XafRag.Blazor.Server",
       "fontSize": 16,
       "fontFamily": 2,
-      "createdAt": "2026-03-19T17:25:53.683Z",
-      "updatedAt": "2026-03-19T17:25:53.683Z",
+      "createdAt": "2026-03-21T07:56:05.825Z",
+      "updatedAt": "2026-03-21T07:56:05.825Z",
       "version": 1
     },
     {
-      "id": "doc-view",
+      "id": "module-zone",
       "type": "rectangle",
-      "x": 660,
-      "y": 105,
-      "width": 230,
-      "height": 60,
-      "backgroundColor": "#bbdefb",
-      "roughness": 0,
-      "label": {
-        "text": "Documents"
-      },
-      "fontSize": 16,
-      "fontFamily": 2,
-      "createdAt": "2026-03-19T17:25:53.683Z",
-      "updatedAt": "2026-03-19T17:25:53.683Z",
-      "version": 1
-    },
-    {
-      "id": "svc-zone",
-      "type": "rectangle",
-      "x": 40,
-      "y": 230,
-      "width": 880,
-      "height": 190,
-      "backgroundColor": "#e8f5e9",
-      "strokeColor": "#388e3c",
+      "x": 30,
+      "y": 520,
+      "width": 900,
+      "height": 160,
+      "backgroundColor": "#fff3e0",
+      "strokeColor": "#e8590c",
+      "strokeWidth": 1,
       "roughness": 0,
       "opacity": 40,
-      "createdAt": "2026-03-19T17:25:53.683Z",
-      "updatedAt": "2026-03-19T17:25:53.683Z",
+      "createdAt": "2026-03-21T07:56:05.825Z",
+      "updatedAt": "2026-03-21T07:56:05.825Z",
       "version": 1
     },
     {
-      "id": "svc-label",
+      "id": "module-label",
       "type": "text",
-      "x": 55,
-      "y": 238,
-      "strokeColor": "#388e3c",
-      "text": "Services Layer",
-      "fontSize": 14,
+      "x": 50,
+      "y": 530,
+      "strokeColor": "#e8590c",
+      "text": "XafRag.Module",
+      "fontSize": 16,
       "fontFamily": 2,
-      "createdAt": "2026-03-19T17:25:53.683Z",
-      "updatedAt": "2026-03-19T17:25:53.683Z",
+      "createdAt": "2026-03-21T07:56:05.825Z",
+      "updatedAt": "2026-03-21T07:56:05.825Z",
+      "version": 1
+    },
+    {
+      "id": "user",
+      "type": "ellipse",
+      "x": 60,
+      "y": 130,
+      "width": 140,
+      "height": 60,
+      "backgroundColor": "#d0bfff",
+      "roughness": 0,
+      "label": {
+        "text": "User"
+      },
+      "fontFamily": 2,
+      "createdAt": "2026-03-21T07:56:05.825Z",
+      "updatedAt": "2026-03-21T07:56:05.825Z",
+      "version": 1
+    },
+    {
+      "id": "dxaichat",
+      "type": "rectangle",
+      "x": 270,
+      "y": 130,
+      "width": 180,
+      "height": 60,
+      "backgroundColor": "#a5d8ff",
+      "roughness": 0,
+      "label": {
+        "text": "DxAIChat UI"
+      },
+      "fontFamily": 2,
+      "createdAt": "2026-03-21T07:56:05.825Z",
+      "updatedAt": "2026-03-21T07:56:05.825Z",
+      "version": 1
+    },
+    {
+      "id": "xaf-views",
+      "type": "rectangle",
+      "x": 520,
+      "y": 130,
+      "width": 180,
+      "height": 60,
+      "backgroundColor": "#a5d8ff",
+      "roughness": 0,
+      "label": {
+        "text": "XAF Detail/List Views"
+      },
+      "fontFamily": 2,
+      "createdAt": "2026-03-21T07:56:05.825Z",
+      "updatedAt": "2026-03-21T07:56:05.825Z",
       "version": 1
     },
     {
       "id": "rag-svc",
       "type": "rectangle",
-      "x": 70,
-      "y": 275,
-      "width": 200,
+      "x": 170,
+      "y": 250,
+      "width": 180,
       "height": 60,
-      "backgroundColor": "#c8e6c9",
+      "backgroundColor": "#b2f2bb",
       "roughness": 0,
       "label": {
         "text": "RagService"
       },
-      "fontSize": 18,
       "fontFamily": 2,
-      "createdAt": "2026-03-19T17:25:53.683Z",
-      "updatedAt": "2026-03-19T17:25:53.683Z",
-      "version": 1
-    },
-    {
-      "id": "ingest-svc",
-      "type": "rectangle",
-      "x": 540,
-      "y": 275,
-      "width": 220,
-      "height": 60,
-      "backgroundColor": "#c8e6c9",
-      "roughness": 0,
-      "label": {
-        "text": "IngestionService"
-      },
-      "fontSize": 18,
-      "fontFamily": 2,
-      "createdAt": "2026-03-19T17:25:53.683Z",
-      "updatedAt": "2026-03-19T17:25:53.683Z",
-      "version": 1
-    },
-    {
-      "id": "chunk-svc",
-      "type": "rectangle",
-      "x": 70,
-      "y": 355,
-      "width": 200,
-      "height": 50,
-      "backgroundColor": "#dcedc8",
-      "roughness": 0,
-      "label": {
-        "text": "ChunkingService"
-      },
-      "fontSize": 15,
-      "fontFamily": 2,
-      "createdAt": "2026-03-19T17:25:53.683Z",
-      "updatedAt": "2026-03-19T17:25:53.683Z",
+      "createdAt": "2026-03-21T07:56:05.825Z",
+      "updatedAt": "2026-03-21T07:56:05.825Z",
       "version": 1
     },
     {
       "id": "embed-svc",
       "type": "rectangle",
-      "x": 310,
-      "y": 355,
-      "width": 210,
-      "height": 50,
-      "backgroundColor": "#dcedc8",
+      "x": 410,
+      "y": 250,
+      "width": 180,
+      "height": 60,
+      "backgroundColor": "#b2f2bb",
       "roughness": 0,
       "label": {
         "text": "EmbeddingService"
       },
-      "fontSize": 15,
       "fontFamily": 2,
-      "createdAt": "2026-03-19T17:25:53.683Z",
-      "updatedAt": "2026-03-19T17:25:53.683Z",
+      "createdAt": "2026-03-21T07:56:05.826Z",
+      "updatedAt": "2026-03-21T07:56:05.826Z",
       "version": 1
     },
     {
-      "id": "doc-proc-svc",
+      "id": "ingest-svc",
       "type": "rectangle",
-      "x": 560,
-      "y": 355,
-      "width": 280,
-      "height": 50,
-      "backgroundColor": "#dcedc8",
+      "x": 650,
+      "y": 250,
+      "width": 180,
+      "height": 60,
+      "backgroundColor": "#b2f2bb",
       "roughness": 0,
       "label": {
-        "text": "DocumentProcessingService"
+        "text": "IngestionService"
       },
-      "fontSize": 14,
       "fontFamily": 2,
-      "createdAt": "2026-03-19T17:25:53.683Z",
-      "updatedAt": "2026-03-19T17:26:25.459Z",
+      "createdAt": "2026-03-21T07:56:05.826Z",
+      "updatedAt": "2026-03-21T07:56:05.826Z",
+      "version": 1
+    },
+    {
+      "id": "chunk-svc",
+      "type": "rectangle",
+      "x": 410,
+      "y": 360,
+      "width": 180,
+      "height": 60,
+      "backgroundColor": "#b2f2bb",
+      "roughness": 0,
+      "label": {
+        "text": "ChunkingService"
+      },
+      "fontFamily": 2,
+      "createdAt": "2026-03-21T07:56:05.826Z",
+      "updatedAt": "2026-03-21T07:56:05.826Z",
+      "version": 1
+    },
+    {
+      "id": "docproc-svc",
+      "type": "rectangle",
+      "x": 650,
+      "y": 360,
+      "width": 220,
+      "height": 60,
+      "backgroundColor": "#b2f2bb",
+      "roughness": 0,
+      "label": {
+        "text": "DocProcessingService"
+      },
+      "fontFamily": 2,
+      "createdAt": "2026-03-21T07:56:05.826Z",
+      "updatedAt": "2026-03-21T07:56:36.830Z",
       "version": 2
     },
     {
-      "id": "infra-zone",
+      "id": "knowledge-article",
       "type": "rectangle",
-      "x": 40,
-      "y": 460,
-      "width": 880,
-      "height": 120,
-      "backgroundColor": "#fff3e0",
-      "strokeColor": "#e65100",
-      "roughness": 0,
-      "opacity": 40,
-      "createdAt": "2026-03-19T17:25:53.683Z",
-      "updatedAt": "2026-03-19T17:25:53.683Z",
-      "version": 1
-    },
-    {
-      "id": "infra-label",
-      "type": "text",
-      "x": 55,
-      "y": 468,
-      "strokeColor": "#e65100",
-      "text": "Infrastructure",
-      "fontSize": 14,
-      "fontFamily": 2,
-      "createdAt": "2026-03-19T17:25:53.683Z",
-      "updatedAt": "2026-03-19T17:25:53.683Z",
-      "version": 1
-    },
-    {
-      "id": "pgvector",
-      "type": "rectangle",
-      "x": 70,
-      "y": 500,
-      "width": 300,
+      "x": 60,
+      "y": 560,
+      "width": 190,
       "height": 60,
-      "backgroundColor": "#ffe0b2",
+      "backgroundColor": "#ffec99",
+      "roughness": 0,
+      "label": {
+        "text": "KnowledgeArticle"
+      },
+      "fontFamily": 2,
+      "createdAt": "2026-03-21T07:56:05.826Z",
+      "updatedAt": "2026-03-21T07:56:05.826Z",
+      "version": 1
+    },
+    {
+      "id": "document",
+      "type": "rectangle",
+      "x": 290,
+      "y": 560,
+      "width": 160,
+      "height": 60,
+      "backgroundColor": "#ffec99",
+      "roughness": 0,
+      "label": {
+        "text": "Document"
+      },
+      "fontFamily": 2,
+      "createdAt": "2026-03-21T07:56:05.826Z",
+      "updatedAt": "2026-03-21T07:56:05.826Z",
+      "version": 1
+    },
+    {
+      "id": "knowledge-chunk",
+      "type": "rectangle",
+      "x": 500,
+      "y": 560,
+      "width": 190,
+      "height": 60,
+      "backgroundColor": "#ffec99",
+      "roughness": 0,
+      "label": {
+        "text": "KnowledgeChunk"
+      },
+      "fontFamily": 2,
+      "createdAt": "2026-03-21T07:56:05.826Z",
+      "updatedAt": "2026-03-21T07:56:05.826Z",
+      "version": 1
+    },
+    {
+      "id": "rag-dbctx",
+      "type": "rectangle",
+      "x": 740,
+      "y": 560,
+      "width": 160,
+      "height": 60,
+      "backgroundColor": "#ffec99",
+      "roughness": 0,
+      "label": {
+        "text": "RagDbContext"
+      },
+      "fontFamily": 2,
+      "createdAt": "2026-03-21T07:56:05.826Z",
+      "updatedAt": "2026-03-21T07:56:05.826Z",
+      "version": 1
+    },
+    {
+      "id": "postgres",
+      "type": "rectangle",
+      "x": 350,
+      "y": 740,
+      "width": 260,
+      "height": 70,
+      "backgroundColor": "#d0bfff",
+      "strokeWidth": 2,
       "roughness": 0,
       "label": {
         "text": "PostgreSQL + PGVector"
       },
-      "fontSize": 18,
       "fontFamily": 2,
-      "createdAt": "2026-03-19T17:25:53.683Z",
-      "updatedAt": "2026-03-19T17:25:53.683Z",
+      "createdAt": "2026-03-21T07:56:05.826Z",
+      "updatedAt": "2026-03-21T07:56:05.826Z",
       "version": 1
     },
     {
       "id": "openai",
       "type": "rectangle",
-      "x": 540,
-      "y": 500,
-      "width": 270,
-      "height": 60,
-      "backgroundColor": "#ffe0b2",
+      "x": 60,
+      "y": 740,
+      "width": 220,
+      "height": 70,
+      "backgroundColor": "#ffc9c9",
+      "strokeWidth": 2,
       "roughness": 0,
       "label": {
-        "text": "OpenAI API"
+        "text": "OpenAI API\n(embeddings + chat)"
       },
-      "fontSize": 18,
       "fontFamily": 2,
-      "createdAt": "2026-03-19T17:25:53.683Z",
-      "updatedAt": "2026-03-19T17:25:53.683Z",
+      "createdAt": "2026-03-21T07:56:05.826Z",
+      "updatedAt": "2026-03-21T07:56:05.826Z",
       "version": 1
     },
     {
-      "id": "mmxqred2wfhul82qh5",
+      "id": "mn01ac6jx84847kkkon",
       "type": "arrow",
-      "x": 170,
-      "y": 173,
-      "strokeColor": "#1565c0",
+      "x": 208,
+      "y": 160,
+      "strokeWidth": 2,
       "points": [
         [
           0,
           0
         ],
         [
-          0,
-          94
+          54,
+          0
         ]
       ],
       "start": {
-        "id": "chat"
+        "id": "user"
+      },
+      "end": {
+        "id": "dxaichat"
+      },
+      "createdAt": "2026-03-21T07:56:05.826Z",
+      "updatedAt": "2026-03-21T07:56:05.826Z",
+      "version": 1
+    },
+    {
+      "id": "mn01ac6j7a7buealot",
+      "type": "arrow",
+      "x": 208,
+      "y": 160,
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          304,
+          0
+        ]
+      ],
+      "start": {
+        "id": "user"
+      },
+      "end": {
+        "id": "xaf-views"
+      },
+      "createdAt": "2026-03-21T07:56:05.826Z",
+      "updatedAt": "2026-03-21T07:56:05.826Z",
+      "version": 1
+    },
+    {
+      "id": "mn01ac6j4k2vn1soos7",
+      "type": "arrow",
+      "x": 329.8785248026842,
+      "y": 196.14577023677901,
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -39.757049605368366,
+          47.70845952644197
+        ]
+      ],
+      "start": {
+        "id": "dxaichat"
       },
       "end": {
         "id": "rag-svc"
       },
-      "createdAt": "2026-03-19T17:25:53.684Z",
-      "updatedAt": "2026-03-19T17:25:53.684Z",
+      "createdAt": "2026-03-21T07:56:05.826Z",
+      "updatedAt": "2026-03-21T07:56:05.826Z",
       "version": 1
     },
     {
-      "id": "mmxqred2scpp89dhd6",
+      "id": "mn01ac6jaavyt3s9kzd",
       "type": "arrow",
-      "x": 507.58081110275145,
-      "y": 170.49298826370972,
-      "strokeColor": "#2e7d32",
+      "x": 358,
+      "y": 280,
+      "strokeWidth": 2,
       "points": [
         [
           0,
           0
         ],
         [
-          104.83837779449709,
-          99.01402347258056
-        ]
-      ],
-      "start": {
-        "id": "article-view"
-      },
-      "end": {
-        "id": "ingest-svc"
-      },
-      "createdAt": "2026-03-19T17:25:53.684Z",
-      "updatedAt": "2026-03-19T17:25:53.684Z",
-      "version": 1
-    },
-    {
-      "id": "mmxqred2nrdk18mjrzf",
-      "type": "arrow",
-      "x": 748.2020528667681,
-      "y": 171.4452081011954,
-      "strokeColor": "#2e7d32",
-      "points": [
-        [
-          0,
+          44,
           0
-        ],
-        [
-          -71.4041057335362,
-          97.10958379760919
-        ]
-      ],
-      "start": {
-        "id": "doc-view"
-      },
-      "end": {
-        "id": "ingest-svc"
-      },
-      "createdAt": "2026-03-19T17:25:53.684Z",
-      "updatedAt": "2026-03-19T17:25:53.684Z",
-      "version": 1
-    },
-    {
-      "id": "mmxqred2e4l0td1pw6k",
-      "type": "arrow",
-      "x": 275.64959964405944,
-      "y": 337.3417141767529,
-      "strokeColor": "#1565c0",
-      "points": [
-        [
-          0,
-          0
-        ],
-        [
-          50.0341340452145,
-          15.316571646494253
         ]
       ],
       "start": {
@@ -379,24 +413,76 @@
       "end": {
         "id": "embed-svc"
       },
-      "createdAt": "2026-03-19T17:25:53.684Z",
-      "updatedAt": "2026-03-19T17:25:53.684Z",
+      "createdAt": "2026-03-21T07:56:05.826Z",
+      "updatedAt": "2026-03-21T07:56:05.826Z",
       "version": 1
     },
     {
-      "id": "mmxqred2563qex8lyyn",
+      "id": "mn01ac6jjgz8tgvgg4p",
       "type": "arrow",
-      "x": 532.0959037299912,
-      "y": 323.4225150421889,
-      "strokeColor": "#2e7d32",
+      "x": 648.3784275570199,
+      "y": 195.42624082186452,
+      "strokeWidth": 2,
       "points": [
         [
           0,
           0
         ],
         [
-          -254.19180745998233,
-          39.717469915622246
+          53.24314488596019,
+          49.14751835627095
+        ]
+      ],
+      "start": {
+        "id": "xaf-views"
+      },
+      "end": {
+        "id": "ingest-svc"
+      },
+      "createdAt": "2026-03-21T07:56:05.826Z",
+      "updatedAt": "2026-03-21T07:56:05.826Z",
+      "version": 1
+    },
+    {
+      "id": "mn01ac6jtkc6l4qs5hc",
+      "type": "arrow",
+      "x": 642,
+      "y": 280,
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -44,
+          0
+        ]
+      ],
+      "start": {
+        "id": "ingest-svc"
+      },
+      "end": {
+        "id": "embed-svc"
+      },
+      "createdAt": "2026-03-21T07:56:05.826Z",
+      "updatedAt": "2026-03-21T07:56:05.826Z",
+      "version": 1
+    },
+    {
+      "id": "mn01ac6jp3xzaxub6vn",
+      "type": "arrow",
+      "x": 667.2729359623003,
+      "y": 313.3332376839457,
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -94.54587192460053,
+          43.333524632108606
         ]
       ],
       "start": {
@@ -405,128 +491,50 @@
       "end": {
         "id": "chunk-svc"
       },
-      "createdAt": "2026-03-19T17:25:53.684Z",
-      "updatedAt": "2026-03-19T17:25:53.684Z",
+      "createdAt": "2026-03-21T07:56:05.826Z",
+      "updatedAt": "2026-03-21T07:56:05.826Z",
       "version": 1
     },
     {
-      "id": "mmxqred2tgc01740m6l",
+      "id": "mn01ac6j4ovgarg16m2",
       "type": "arrow",
-      "x": 548.3787263102505,
-      "y": 337.4323213903456,
-      "strokeColor": "#2e7d32",
+      "x": 740,
+      "y": 318,
+      "strokeWidth": 2,
       "points": [
         [
           0,
           0
         ],
         [
-          -47.42411928716774,
-          15.135357219308844
+          0,
+          34
         ]
       ],
       "start": {
         "id": "ingest-svc"
       },
       "end": {
-        "id": "embed-svc"
+        "id": "docproc-svc"
       },
-      "createdAt": "2026-03-19T17:25:53.684Z",
-      "updatedAt": "2026-03-19T17:25:53.684Z",
+      "createdAt": "2026-03-21T07:56:05.826Z",
+      "updatedAt": "2026-03-21T07:56:05.826Z",
       "version": 1
     },
     {
-      "id": "mmxqred2c67rohb0v6t",
+      "id": "mn01ac6jnbad94drdx",
       "type": "arrow",
-      "x": 667.383083722649,
-      "y": 342.2494651199621,
-      "strokeColor": "#2e7d32",
+      "x": 475.5623984301982,
+      "y": 316.6564023547028,
+      "strokeWidth": 2,
       "points": [
         [
           0,
           0
         ],
         [
-          2.567165888035447,
-          5.501069760075779
-        ]
-      ],
-      "start": {
-        "id": "ingest-svc"
-      },
-      "end": {
-        "id": "doc-proc-svc"
-      },
-      "createdAt": "2026-03-19T17:25:53.684Z",
-      "updatedAt": "2026-03-19T17:25:53.684Z",
-      "version": 1
-    },
-    {
-      "id": "mmxqred22uva2xy3fsl",
-      "type": "arrow",
-      "x": 178.4021103292159,
-      "y": 342.8094964814716,
-      "strokeColor": "#1565c0",
-      "points": [
-        [
-          0,
-          0
-        ],
-        [
-          33.1957793415682,
-          149.38100703705675
-        ]
-      ],
-      "start": {
-        "id": "rag-svc"
-      },
-      "end": {
-        "id": "pgvector"
-      },
-      "createdAt": "2026-03-19T17:25:53.684Z",
-      "updatedAt": "2026-03-19T17:25:53.684Z",
-      "version": 1
-    },
-    {
-      "id": "mmxqred2k1u030u7f78",
-      "type": "arrow",
-      "x": 244.64083907135625,
-      "y": 338.255819388228,
-      "strokeColor": "#1565c0",
-      "points": [
-        [
-          0,
-          0
-        ],
-        [
-          355.7183218572874,
-          158.48836122354396
-        ]
-      ],
-      "start": {
-        "id": "rag-svc"
-      },
-      "end": {
-        "id": "openai"
-      },
-      "createdAt": "2026-03-19T17:25:53.684Z",
-      "updatedAt": "2026-03-19T17:25:53.684Z",
-      "version": 1
-    },
-    {
-      "id": "mmxqred269kkgsj480w",
-      "type": "arrow",
-      "x": 465.2628180217221,
-      "y": 408.9977796279166,
-      "strokeColor": "#555",
-      "points": [
-        [
-          0,
-          0
-        ],
-        [
-          150.80769728988906,
-          87.0044407441668
+          -277.791463527063,
+          416.68719529059445
         ]
       ],
       "start": {
@@ -535,60 +543,112 @@
       "end": {
         "id": "openai"
       },
-      "createdAt": "2026-03-19T17:25:53.684Z",
-      "updatedAt": "2026-03-19T17:25:53.684Z",
+      "createdAt": "2026-03-21T07:56:05.826Z",
+      "updatedAt": "2026-03-21T07:56:05.826Z",
       "version": 1
     },
     {
-      "id": "mmxqred2qvwxg8qiek",
+      "id": "mn01ac6jccxuqwd34ft",
       "type": "arrow",
-      "x": 585.5784018178457,
-      "y": 338.7089757929877,
-      "strokeColor": "#2e7d32",
+      "x": 253.11437103985466,
+      "y": 317.87095928079924,
+      "strokeWidth": 2,
       "points": [
         [
           0,
           0
         ],
         [
-          -301.1568036356914,
-          157.5820484140246
+          -75.31965117061841,
+          414.25808143840146
         ]
       ],
       "start": {
-        "id": "ingest-svc"
+        "id": "rag-svc"
       },
       "end": {
-        "id": "pgvector"
+        "id": "openai"
       },
-      "createdAt": "2026-03-19T17:25:53.684Z",
-      "updatedAt": "2026-03-19T17:25:53.684Z",
+      "createdAt": "2026-03-21T07:56:05.826Z",
+      "updatedAt": "2026-03-21T07:56:05.826Z",
       "version": 1
     },
     {
-      "id": "retrieval-label",
-      "type": "text",
-      "x": 75,
-      "y": 175,
-      "strokeColor": "#1565c0",
-      "text": "Retrieval Flow",
-      "fontSize": 13,
-      "fontFamily": 2,
-      "createdAt": "2026-03-19T17:25:53.684Z",
-      "updatedAt": "2026-03-19T17:25:53.684Z",
+      "id": "mn01ac6j476qdqv4kmb",
+      "type": "arrow",
+      "x": 298.2910580904045,
+      "y": 315.4335164418668,
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          258.41788381919116,
+          239.1329671162664
+        ]
+      ],
+      "start": {
+        "id": "rag-svc"
+      },
+      "end": {
+        "id": "knowledge-chunk"
+      },
+      "createdAt": "2026-03-21T07:56:05.827Z",
+      "updatedAt": "2026-03-21T07:56:05.827Z",
       "version": 1
     },
     {
-      "id": "ingestion-label",
-      "type": "text",
-      "x": 600,
-      "y": 175,
-      "strokeColor": "#2e7d32",
-      "text": "Ingestion Flow",
-      "fontSize": 13,
-      "fontFamily": 2,
-      "createdAt": "2026-03-19T17:25:53.684Z",
-      "updatedAt": "2026-03-19T17:25:53.684Z",
+      "id": "mn01ac6jlzzn1i1s5w",
+      "type": "arrow",
+      "x": 572.1278783823464,
+      "y": 626.7942826023124,
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -66.14764865658458,
+          106.41143479537527
+        ]
+      ],
+      "start": {
+        "id": "knowledge-chunk"
+      },
+      "end": {
+        "id": "postgres"
+      },
+      "createdAt": "2026-03-21T07:56:05.827Z",
+      "updatedAt": "2026-03-21T07:56:05.827Z",
+      "version": 1
+    },
+    {
+      "id": "mn01ac6j7zq3x5parr6",
+      "type": "arrow",
+      "x": 757.8377547198749,
+      "y": 623.8235746377152,
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -206.48632025056042,
+          112.35285072456963
+        ]
+      ],
+      "start": {
+        "id": "rag-dbctx"
+      },
+      "end": {
+        "id": "postgres"
+      },
+      "createdAt": "2026-03-21T07:56:05.827Z",
+      "updatedAt": "2026-03-21T07:56:05.827Z",
       "version": 1
     }
   ],

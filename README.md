@@ -1,4 +1,8 @@
-# XafRag — RAG Sample for DevExpress XAF
+# XafRa
+
+https://github.com/user-attachments/assets/086798df-3b80-4133-9bff-fbf0672e4feb
+
+g — RAG Sample for DevExpress XAF
 
 ![Architecture Diagram](docs/architecture.png)
 

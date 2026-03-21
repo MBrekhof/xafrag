@@ -8,13 +8,21 @@ using XafRag.Module.BusinessObjects;
 
 namespace XafRag.Blazor.Server.Services;
 
+internal class SourceNameRow
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+}
+
 public class SearchResult
 {
     public string Content { get; set; } = string.Empty;
     public double Distance { get; set; }
+    public int ChunkIndex { get; set; }
     public ChunkSourceType SourceType { get; set; }
     public int? KnowledgeArticleId { get; set; }
     public int? DocumentId { get; set; }
+    public string SourceName { get; set; } = string.Empty;
 }
 
 public class RagService
@@ -56,6 +64,7 @@ public class RagService
             {
                 Content = k.Content,
                 Distance = k.Embedding!.CosineDistance(queryVector),
+                ChunkIndex = k.ChunkIndex,
                 SourceType = k.SourceType,
                 KnowledgeArticleId = k.KnowledgeArticleId,
                 DocumentId = k.DocumentId
@@ -64,6 +73,34 @@ public class RagService
             .OrderBy(r => r.Distance)
             .Take(_options.MaxResults)
             .ToListAsync(ct);
+
+        // Resolve source names
+        var docIds = results.Where(r => r.SourceType == ChunkSourceType.Document && r.DocumentId.HasValue)
+            .Select(r => r.DocumentId!.Value).Distinct().ToList();
+        var articleIds = results.Where(r => r.SourceType == ChunkSourceType.Article && r.KnowledgeArticleId.HasValue)
+            .Select(r => r.KnowledgeArticleId!.Value).Distinct().ToList();
+
+        var docNames = docIds.Count > 0
+            ? await _ragDb.Database.SqlQueryRaw<SourceNameRow>(
+                """SELECT "Id", "FileName" AS "Name" FROM "Documents" WHERE "Id" = ANY({0})""", docIds.ToArray())
+                .ToDictionaryAsync(r => r.Id, r => r.Name, ct)
+            : new Dictionary<int, string>();
+
+        var articleNames = articleIds.Count > 0
+            ? await _ragDb.Database.SqlQueryRaw<SourceNameRow>(
+                """SELECT "Id", "Title" AS "Name" FROM "KnowledgeArticles" WHERE "Id" = ANY({0})""", articleIds.ToArray())
+                .ToDictionaryAsync(r => r.Id, r => r.Name, ct)
+            : new Dictionary<int, string>();
+
+        foreach (var r in results)
+        {
+            r.SourceName = r.SourceType switch
+            {
+                ChunkSourceType.Document when r.DocumentId.HasValue && docNames.TryGetValue(r.DocumentId.Value, out var name) => name,
+                ChunkSourceType.Article when r.KnowledgeArticleId.HasValue && articleNames.TryGetValue(r.KnowledgeArticleId.Value, out var name) => name,
+                _ => $"{r.SourceType} #{r.DocumentId ?? r.KnowledgeArticleId}"
+            };
+        }
 
         _logger.LogInformation("RAG search for '{Query}' returned {Count} results", query, results.Count);
         return results;
@@ -77,8 +114,8 @@ public class RagService
         var searchResults = await SearchAsync(question, ct);
 
         var contextText = searchResults.Count > 0
-            ? string.Join("\n\n---\n\n", searchResults.Select((r, i) =>
-                $"[Source {i + 1} - {r.SourceType}] {r.Content}"))
+            ? string.Join("\n\n---\n\n", searchResults.Select(r =>
+                $"**[Part {r.ChunkIndex + 1} of \"{r.SourceName}\"]** {r.Content}"))
             : "No relevant context found in the knowledge base.";
 
         var messages = new List<ChatMessage>

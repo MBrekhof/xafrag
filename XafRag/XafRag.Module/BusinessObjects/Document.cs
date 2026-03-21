@@ -30,6 +30,13 @@ public class Document : IXafEntityObject
         Status = DocumentStatus.Pending;
     }
 
-    public void OnSaving() { }
+    public void OnSaving()
+    {
+        if (FileData != null && !string.IsNullOrEmpty(FileData.FileName))
+        {
+            FileName = FileData.FileName;
+        }
+    }
+
     public void OnLoaded() { }
 }

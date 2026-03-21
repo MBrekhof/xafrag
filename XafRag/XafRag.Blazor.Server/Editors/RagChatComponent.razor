@@ -5,6 +5,8 @@
 @inject XafRag.Blazor.Server.Services.RagService RagService
 
 <DxAIChat CssClass="rag-chat"
+          ShowHeader="true"
+          HeaderText="Knowledge Base Assistant"
           UseStreaming="false"
           ResponseContentFormat="ResponseContentFormat.Markdown"
           MessageSent="OnMessageSent">

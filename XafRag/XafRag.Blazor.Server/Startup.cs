@@ -60,9 +60,8 @@ namespace XafRag.Blazor.Server
             services.Configure<RagOptions>(Configuration.GetSection(RagOptions.SectionName));
 
             // OpenAI clients
-            var openAiApiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY")
-                ?? throw new InvalidOperationException("OPENAI_API_KEY environment variable is not set.");
             var openAiOptions = Configuration.GetSection(OpenAiOptions.SectionName).Get<OpenAiOptions>()!;
+            var openAiApiKey = openAiOptions.ApiKey;
             var openAiClient = new OpenAIClient(openAiApiKey);
 
             // Chat client (for DxAIChat and RagService)

@@ -28,6 +28,11 @@ namespace XafRag.Blazor.Server
         public XafRagBlazorModule()
         {
         }
+        public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters)
+        {
+            base.AddGeneratorUpdaters(updaters);
+            updaters.Add(new RagChatDetailViewUpdater());
+        }
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB)
         {
             return ModuleUpdater.EmptyModuleUpdaters;

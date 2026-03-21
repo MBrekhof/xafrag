@@ -1,23 +1,21 @@
 # How to Add RAG to Your Own XAF Application
 
-This guide explains how to replicate the patterns from the XafRag sample in your own DevExpress XAF Blazor Server application. It assumes you already have a working XAF Blazor Server project targeting .NET 8.
+This guide walks you through adding Retrieval-Augmented Generation (RAG) to an existing DevExpress XAF Blazor Server application. It covers every layer — from database setup to chat UI — using the patterns from the XafRag sample.
 
-For the complete implementations of every file mentioned here, refer to the source code in this repository.
-
----
-
-## 1. Prerequisites
-
-Before you start:
-
-- .NET 8 SDK and a DevExpress XAF 25.2.x Blazor Server project
-- Docker (for the PGVector database)
-- An OpenAI API key (for `text-embedding-3-small` and `gpt-4o`)
-- DevExpress NuGet feed configured in your `nuget.config` or Visual Studio package sources
+For the complete source code of every file mentioned here, refer to this repository.
 
 ---
 
-## 2. Add Docker for PGVector
+## Prerequisites
+
+- .NET 8 SDK with a working XAF Blazor Server project (DevExpress 25.2.x)
+- Docker (for PostgreSQL + PGVector)
+- An OpenAI API key
+- DevExpress NuGet feed configured
+
+---
+
+## Step 1: Add Docker for PGVector
 
 Create (or extend) `docker-compose.yml` at your repo root:
 
@@ -30,51 +28,112 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     ports:
-      - "5432:5432"
+      - "5435:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql
 
 volumes:
   postgres-data:
 ```
 
-Use `pgvector/pgvector:pg18` (or `pg16`/`pg17`) rather than the plain `postgres` image — it has the `vector` extension pre-installed.
+Note: PGVector pg18 changed its data directory layout. Mount at `/var/lib/postgresql` (not `/var/lib/postgresql/data`).
+
+```bash
+docker compose up -d
+```
 
 ---
 
-## 3. Install NuGet Packages
+## Step 2: Install NuGet Packages
 
-### XafRag.Module
+### Module project (.Module.csproj)
 
 ```xml
 <PackageReference Include="Pgvector" Version="0.3.2" />
-<PackageReference Include="Pgvector.EntityFrameworkCore" Version="0.2.2" />
-<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.8" />
+<PackageReference Include="Pgvector.EntityFrameworkCore" Version="0.3.0" />
 ```
 
-### XafRag.Blazor.Server
+### Blazor Server project (.Blazor.Server.csproj)
 
 ```xml
 <PackageReference Include="Pgvector" Version="0.3.2" />
-<PackageReference Include="Pgvector.EntityFrameworkCore" Version="0.2.2" />
-<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.8" />
+<PackageReference Include="Pgvector.EntityFrameworkCore" Version="0.3.0" />
 <PackageReference Include="Microsoft.Extensions.AI" Version="9.7.1" />
 <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.7.1-preview.1.25365.4" />
-<PackageReference Include="DevExpress.AIIntegration.Blazor.Chat" Version="25.2.3" />
+<PackageReference Include="DevExpress.AIIntegration.Blazor.Chat" Version="25.2.4" />
 <PackageReference Include="DevExpress.Document.Processor" Version="25.2.3" />
 <PackageReference Include="Markdig" Version="0.42.0" />
 <PackageReference Include="HtmlSanitizer" Version="8.1.870" />
+<PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
 ```
-
-**Compatibility note:** `Pgvector.EntityFrameworkCore` 0.2.2 is required for EF Core 8. Version 0.3.x targets EF Core 9+. Do not upgrade it unless you also upgrade EF Core.
 
 ---
 
-## 4. Create the Data Model
+## Step 3: Configuration
 
-### XAF business objects (in the Module project)
+### appsettings.json
 
-`KnowledgeArticle` is a standard XAF EF Core entity with a `[NavigationItem]` attribute so it appears in the sidebar:
+Add the OpenAI and RAG sections (keep `ApiKey` empty here):
+
+```json
+"OpenAI": {
+  "ApiKey": "",
+  "EmbeddingModel": "text-embedding-3-small",
+  "ChatModel": "gpt-4o"
+},
+"Rag": {
+  "ChunkTokenLimit": 500,
+  "ChunkOverlap": 100,
+  "MaxResults": 5,
+  "DistanceThreshold": 1.0
+}
+```
+
+### appsettings.Development.json (gitignored)
+
+Place your actual API key here:
+
+```json
+{
+  "OpenAI": {
+    "ApiKey": "sk-your-key-here"
+  }
+}
+```
+
+Make sure `appsettings.Development.json` is in your `.gitignore`.
+
+### Options classes
+
+```csharp
+// Configuration/OpenAiOptions.cs
+public class OpenAiOptions
+{
+    public const string SectionName = "OpenAI";
+    public string ApiKey { get; set; } = string.Empty;
+    public string EmbeddingModel { get; set; } = "text-embedding-3-small";
+    public string ChatModel { get; set; } = "gpt-4o";
+}
+
+// Configuration/RagOptions.cs
+public class RagOptions
+{
+    public const string SectionName = "Rag";
+    public int ChunkTokenLimit { get; set; } = 500;
+    public int ChunkOverlap { get; set; } = 100;
+    public int MaxResults { get; set; } = 5;
+    public double DistanceThreshold { get; set; } = 1.0;
+}
+```
+
+---
+
+## Step 4: Data Model
+
+### XAF entities (Module project)
+
+**KnowledgeArticle** — a standard XAF entity for manually authored content:
 
 ```csharp
 [DefaultClassOptions]
@@ -100,9 +159,43 @@ public class KnowledgeArticle : IXafEntityObject
 }
 ```
 
-`Document` uses XAF's built-in `FileData` type to handle binary uploads.
+**Document** — uses XAF's `FileData` for binary uploads. The filename is auto-populated from the uploaded file:
 
-For the chat view, create a **non-persistent** placeholder object. XAF needs a business object to open a Detail View, even when there is no database-backed record:
+```csharp
+[DefaultClassOptions]
+[NavigationItem("Knowledge Base")]
+[DefaultProperty(nameof(FileName))]
+public class Document : IXafEntityObject
+{
+    [Key]
+    public virtual int Id { get; set; }
+
+    [FieldSize(500)]
+    public virtual string FileName { get; set; } = string.Empty;
+
+    public virtual FileData? FileData { get; set; }
+    public virtual DocumentStatus Status { get; set; }
+    public virtual DateTime CreatedDate { get; set; }
+
+    public void OnCreated()
+    {
+        CreatedDate = DateTime.UtcNow;
+        Status = DocumentStatus.Pending;
+    }
+
+    public void OnSaving()
+    {
+        if (FileData != null && !string.IsNullOrEmpty(FileData.FileName))
+            FileName = FileData.FileName;
+    }
+
+    public void OnLoaded() { }
+}
+
+public enum DocumentStatus { Pending, Processing, Completed, Failed }
+```
+
+**RagChatHolder** — a non-persistent placeholder. XAF needs a business object to open a DetailView, even when there is no database record:
 
 ```csharp
 [DomainComponent]
@@ -112,11 +205,11 @@ For the chat view, create a **non-persistent** placeholder object. XAF needs a b
 public class RagChatHolder : NonPersistentBaseObject { }
 ```
 
-Register `KnowledgeArticle` and `Document` as `DbSet` properties in your `XafEFCoreDbContext`. Do not register `RagChatHolder` — it is non-persistent.
+Register `KnowledgeArticle` and `Document` as `DbSet` properties in your `XafEFCoreDbContext`. Do **not** register `RagChatHolder` — it is non-persistent.
 
-### KnowledgeChunk and RagDbContext (in the Module project)
+### KnowledgeChunk and RagDbContext (Module project)
 
-`KnowledgeChunk` stores the text chunks and their embeddings. It uses conventional EF Core data annotations rather than XAF attributes because XAF must not manage this entity:
+`KnowledgeChunk` stores text chunks and their embeddings. It uses standard EF Core annotations — XAF must not manage this entity:
 
 ```csharp
 [Table("knowledge_chunks")]
@@ -139,7 +232,7 @@ public class KnowledgeChunk
     public int ChunkIndex { get; set; }
 
     [Column("source_type")]
-    public ChunkSourceType SourceType { get; set; }  // Article or Document enum
+    public ChunkSourceType SourceType { get; set; }
 
     [Column("knowledge_article_id")]
     public int? KnowledgeArticleId { get; set; }
@@ -147,17 +240,18 @@ public class KnowledgeChunk
     [Column("document_id")]
     public int? DocumentId { get; set; }
 }
+
+public enum ChunkSourceType { Article, Document }
 ```
 
 The dimension `vector(1536)` matches `text-embedding-3-small`. Use `vector(3072)` for `text-embedding-3-large`.
 
-`RagDbContext` is a standalone `DbContext` that is completely separate from XAF's `XafEFCoreDbContext`:
+`RagDbContext` is a standalone `DbContext` completely separate from XAF's context:
 
 ```csharp
 public class RagDbContext : DbContext
 {
     public RagDbContext(DbContextOptions<RagDbContext> options) : base(options) { }
-
     public DbSet<KnowledgeChunk> KnowledgeChunks { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -173,25 +267,17 @@ public class RagDbContext : DbContext
 }
 ```
 
-Why keep it separate? XAF's EF Core context uses `TypesInfoInitializer`, change-tracking strategies, optimistic locking, and deferred deletion that are incompatible with the raw vector operations PGVector requires. A dedicated `RagDbContext` avoids all of that friction.
+**Why a separate DbContext?** XAF's EF Core context uses change-tracking proxies, deferred deletion, and optimistic locking that are incompatible with PGVector's raw vector operations. A dedicated `RagDbContext` avoids all of that friction.
 
 ---
 
-## 5. Build the Services
+## Step 5: Services
 
 All services go in the Blazor Server project under `Services/`.
 
 ### ChunkingService
 
-Splits text into overlapping chunks at paragraph boundaries. Paragraphs that exceed the token limit are split further at sentence boundaries:
-
-```csharp
-// Core loop — see ChunkingService.cs for the full implementation
-var paragraphs = text.Split(["\r\n\r\n", "\n\n"], StringSplitOptions.RemoveEmptyEntries);
-// accumulate paragraphs until ChunkTokenLimit, then flush with overlap
-```
-
-Token count is estimated as `text.Length / 4` (a rough approximation; replace with a proper tokenizer if accuracy matters). Default settings: 500 tokens per chunk, 100-token overlap.
+Splits text into overlapping chunks at paragraph boundaries. Paragraphs exceeding the token limit are split further at sentence boundaries. Token count is estimated as `text.Length / 4`. Default: 500 tokens per chunk, 100-token overlap.
 
 ### EmbeddingService
 
@@ -205,11 +291,9 @@ public async Task<Vector> GenerateEmbeddingAsync(string text, CancellationToken 
 }
 ```
 
-The `Vector` type is from the `Pgvector` package and maps to the `vector` PostgreSQL column type.
-
 ### DocumentProcessingService
 
-Uses DevExpress `PdfDocumentProcessor` and `RichEditDocumentServer` (from `DevExpress.Document.Processor`) to extract plain text from PDF and DOCX files:
+Extracts plain text from uploaded files using DevExpress document processors:
 
 ```csharp
 return extension switch
@@ -223,109 +307,141 @@ return extension switch
 
 ### RagService
 
-Combines vector search with LLM chat completion. The `AskAsync` method is an async stream so responses can be rendered token-by-token:
+Combines vector search with LLM chat. Key features:
+
+- **Source name resolution**: after the vector search, the service queries the `Documents` and `KnowledgeArticles` tables to resolve actual filenames/titles
+- **Context formatting**: chunks are labeled as `**[Part N of "filename.md"]**` so the LLM can cite sources with bold references
+- **Streaming**: `AskAsync` returns `IAsyncEnumerable<string>` for token-by-token rendering
 
 ```csharp
-public async IAsyncEnumerable<string> AskAsync(string question, ...)
-{
-    // 1. Embed the question
-    var queryVector = await _embeddingService.GenerateEmbeddingAsync(question, ct);
-
-    // 2. Vector search via PGVector cosine distance
-    var results = await _ragDb.KnowledgeChunks
-        .Select(k => new { k.Content, Distance = k.Embedding!.CosineDistance(queryVector), ... })
-        .Where(r => r.Distance <= _options.DistanceThreshold)
-        .OrderBy(r => r.Distance)
-        .Take(_options.MaxResults)
-        .ToListAsync(ct);
-
-    // 3. Build augmented prompt
-    var context = string.Join("\n\n---\n\n", results.Select((r, i) =>
-        $"[Source {i + 1}] {r.Content}"));
-    var messages = new List<ChatMessage>
-    {
-        new(ChatRole.System, $"{SystemPrompt}\n\n## Context:\n{context}"),
-        new(ChatRole.User, question)
-    };
-
-    // 4. Stream LLM response
-    await foreach (var update in _chatClient.GetStreamingResponseAsync(messages, ct: ct))
-        if (update.Text is { } text) yield return text;
-}
+var contextText = searchResults.Count > 0
+    ? string.Join("\n\n---\n\n", searchResults.Select(r =>
+        $"**[Part {r.ChunkIndex + 1} of \"{r.SourceName}\"]** {r.Content}"))
+    : "No relevant context found in the knowledge base.";
 ```
-
----
-
-## 6. Wire Up Ingestion
 
 ### IngestionService
 
-Register as a **singleton** because it only holds a `IServiceScopeFactory` reference. Each background task creates its own DI scope to resolve scoped services (`RagDbContext`, `ChunkingService`, `EmbeddingService`):
+Runs ingestion on a background thread via `Task.Run`. Each invocation creates its own DI scope. After completion, it updates the Document status to `Completed` or `Failed` via direct SQL:
 
 ```csharp
-public void IngestArticleInBackground(int articleId, string title, string content)
+private static async Task UpdateDocumentStatus(RagDbContext ragDb, int documentId, DocumentStatus status)
 {
-    _ = Task.Run(async () =>
-    {
-        using var scope = _scopeFactory.CreateScope();
-        var ragDb = scope.ServiceProvider.GetRequiredService<RagDbContext>();
-        // ... chunk, embed, delete old chunks, insert new ones, SaveChangesAsync
-    });
+    await ragDb.Database.ExecuteSqlRawAsync(
+        """UPDATE "Documents" SET "Status" = {0} WHERE "Id" = {1}""",
+        (int)status, documentId);
 }
 ```
-
-Exceptions are caught and logged so a failed ingestion never crashes the web request.
-
-### XAF ViewControllers
-
-Create an `ObjectViewController<DetailView, KnowledgeArticle>` in the Blazor Server project (not the Module project, because it depends on `IngestionService`):
-
-```csharp
-public class KnowledgeArticleIngestionController
-    : ObjectViewController<DetailView, KnowledgeArticle>
-{
-    private IngestionService? _ingestionService;
-
-    protected override void OnActivated()
-    {
-        base.OnActivated();
-        _ingestionService = Application.ServiceProvider
-            .GetRequiredService<IngestionService>();
-        ObjectSpace.Committed += ObjectSpace_Committed;
-    }
-
-    protected override void OnDeactivated()
-    {
-        ObjectSpace.Committed -= ObjectSpace_Committed;
-        base.OnDeactivated();
-    }
-
-    private void ObjectSpace_Committed(object? sender, EventArgs e)
-    {
-        var article = ViewCurrentObject;
-        if (article != null && !string.IsNullOrWhiteSpace(article.Content))
-            _ingestionService?.IngestArticleInBackground(
-                article.Id, article.Title, article.Content);
-    }
-}
-```
-
-Create a matching controller for `Document`. In that controller, read the file bytes from `doc.FileData` before passing them to `IngestDocumentInBackground` — the `FileData` object may not be accessible from the background thread.
 
 ---
 
-## 7. Add the Chat UI
+## Step 6: Ingestion Controllers
 
-### Custom ViewItem
+### DocumentIngestionController
 
-XAF Blazor renders custom UI through `IComponentContentHolder`. Create a `ViewItem` subclass that holds a `ComponentModelBase` and returns a `RenderFragment`:
+Key patterns:
+- **Re-entrancy guard**: prevents infinite loop when `CommitChanges()` inside `Committed` fires `Committed` again
+- **Status check**: only processes documents in `Pending` status
+- **Filename fallback**: uses `FileData.FileName` if `Document.FileName` is empty
 
 ```csharp
+public class DocumentIngestionController : ObjectViewController<DetailView, Document>
+{
+    private bool _isCommitting;
+
+    private void ObjectSpace_Committed(object? sender, EventArgs e)
+    {
+        if (_isCommitting) return;
+
+        var doc = ViewCurrentObject;
+        if (doc?.FileData == null || doc.Status != DocumentStatus.Pending) return;
+
+        using var ms = new MemoryStream();
+        doc.FileData.SaveToStream(ms);
+        var bytes = ms.ToArray();
+        if (bytes.Length == 0) return;
+
+        var fileName = !string.IsNullOrEmpty(doc.FileName)
+            ? doc.FileName : doc.FileData.FileName;
+
+        _isCommitting = true;
+        try
+        {
+            doc.Status = DocumentStatus.Processing;
+            ObjectSpace.CommitChanges();
+        }
+        finally { _isCommitting = false; }
+
+        _ingestionService?.IngestDocumentInBackground(doc.Id, fileName, bytes);
+    }
+}
+```
+
+Create a matching `KnowledgeArticleIngestionController` for articles — it is simpler since there is no file extraction or status tracking.
+
+---
+
+## Step 7: Chat UI
+
+### RagChatComponent.razor
+
+The Razor component wraps `DxAIChat` with manual message handling (bypassing the built-in AI client to inject RAG context):
+
+```razor
+@inject RagService RagService
+
+<DxAIChat CssClass="rag-chat"
+          ShowHeader="true"
+          HeaderText="Knowledge Base Assistant"
+          UseStreaming="false"
+          ResponseContentFormat="ResponseContentFormat.Markdown"
+          MessageSent="OnMessageSent">
+    <MessageContentTemplate>
+        <div class="rag-chat-content">
+            @ToHtml(context.Content)
+        </div>
+    </MessageContentTemplate>
+    <EmptyMessageAreaTemplate>
+        <div class="rag-chat-empty">
+            <h3>Knowledge Base Assistant</h3>
+            <p>Ask questions about your knowledge base.</p>
+        </div>
+    </EmptyMessageAreaTemplate>
+</DxAIChat>
+
+@code {
+    private readonly HtmlSanitizer _sanitizer = new();
+
+    private async Task OnMessageSent(MessageSentEventArgs args)
+    {
+        var sb = new System.Text.StringBuilder();
+        await foreach (var chunk in RagService.AskAsync(args.Content, ct: args.CancellationToken))
+            sb.Append(chunk);
+        await args.Chat.SendMessage(sb.ToString(), ChatRole.Assistant);
+    }
+
+    private MarkupString ToHtml(string markdown)
+    {
+        if (string.IsNullOrEmpty(markdown)) return new MarkupString(string.Empty);
+        var html = Markdown.ToHtml(markdown);
+        return new MarkupString(_sanitizer.Sanitize(html));
+    }
+}
+```
+
+`ShowHeader="true"` enables the built-in **Clear Chat** button.
+
+### RagChatViewItem
+
+XAF Blazor renders custom UI through `IComponentContentHolder`:
+
+```csharp
+public interface IModelRagChatViewItem : IModelViewItem { }
+
 [ViewItem(typeof(IModelRagChatViewItem))]
 public class RagChatViewItem(IModelViewItem model, Type objectType)
     : ViewItem(objectType, model.Id),
-      IComponentContentHolder,
-      IComplexViewItem
+      IComponentContentHolder, IComplexViewItem
 {
     private RagChatComponentModel? _componentModel;
 
@@ -347,72 +463,125 @@ public class RagChatComponentModel : ComponentModelBase
 }
 ```
 
-The `IModelRagChatViewItem` interface (extending `IModelViewItem`) is registered automatically by XAF through the `[ViewItem]` attribute.
+### RagChatDetailViewUpdater
 
-After creating `RagChatViewItem`, open the XAF Application Model editor and add an instance of `RagChatViewItem` to the `RagChatHolder_DetailView` view's Items collection.
+Programmatically adds the ViewItem to the DetailView layout so you don't need to use the Model Editor:
 
-### Razor component
-
-```razor
-@inject RagService RagService
-
-<DxAIChat UseStreaming="false"
-          ResponseContentFormat="ResponseContentFormat.Markdown"
-          MessageSent="OnMessageSent">
-    ...
-</DxAIChat>
-
-@code {
-    private async Task OnMessageSent(MessageSentEventArgs args)
+```csharp
+public class RagChatDetailViewUpdater : ModelNodesGeneratorUpdater<ModelViewsNodesGenerator>
+{
+    public override void UpdateNode(ModelNode node)
     {
-        var sb = new StringBuilder();
-        await foreach (var chunk in RagService.AskAsync(args.Content, ct: args.CancellationToken))
-            sb.Append(chunk);
-        await args.Chat.SendMessage(sb.ToString(), ChatRole.Assistant);
+        var views = (IModelViews)node;
+        if (views["RagChatHolder_DetailView"] is not IModelDetailView dv) return;
+
+        const string chatItemId = "RagChatItem";
+        if (dv.Items[chatItemId] == null)
+            dv.Items.AddNode<IModelRagChatViewItem>(chatItemId);
+
+        // Remove the default Oid property editor
+        var oidItem = dv.Items["Oid"];
+        if (oidItem != null) ((IModelNode)oidItem).Remove();
+
+        // Rebuild layout with only the chat item
+        var layout = dv.Layout;
+        if (layout == null) return;
+        for (int i = layout.Count - 1; i >= 0; i--)
+            layout[i].Remove();
+
+        var chatLayoutItem = layout.AddNode<IModelLayoutViewItem>(chatItemId);
+        chatLayoutItem.ViewItem = (IModelViewItem)dv.Items[chatItemId];
     }
 }
 ```
 
-`DxAIChat` is injected with the registered `IChatClient`, but this component bypasses it and calls `RagService.AskAsync` directly so that retrieval-augmented context is injected before the LLM call.
+Register it in your Blazor module:
 
-For Markdown rendering, add `Markdig` and `HtmlSanitizer` packages and convert the response before displaying.
+```csharp
+public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters)
+{
+    base.AddGeneratorUpdaters(updaters);
+    updaters.Add(new RagChatDetailViewUpdater());
+}
+```
+
+### RagChatWindowController
+
+Since `RagChatHolder` is non-persistent, XAF generates a ListView by default. This controller intercepts navigation and redirects to the DetailView:
+
+```csharp
+public class RagChatWindowController : WindowController
+{
+    public RagChatWindowController() { TargetWindowType = WindowType.Main; }
+
+    protected override void OnActivated()
+    {
+        base.OnActivated();
+        var navController = Frame.GetController<ShowNavigationItemController>();
+        if (navController != null)
+            navController.CustomShowNavigationItem += OnCustomShowNavigationItem;
+    }
+
+    protected override void OnDeactivated()
+    {
+        var navController = Frame.GetController<ShowNavigationItemController>();
+        if (navController != null)
+            navController.CustomShowNavigationItem -= OnCustomShowNavigationItem;
+        base.OnDeactivated();
+    }
+
+    private void OnCustomShowNavigationItem(object? sender, CustomShowNavigationItemEventArgs e)
+    {
+        if (e.ActionArguments.SelectedChoiceActionItem?.Data is ViewShortcut shortcut
+            && shortcut.ViewId == "RagChatHolder_ListView")
+        {
+            var objectSpace = Application.CreateObjectSpace(typeof(RagChatHolder));
+            var holder = objectSpace.CreateObject<RagChatHolder>();
+            var detailView = Application.CreateDetailView(objectSpace, holder);
+            detailView.ViewEditMode = ViewEditMode.View;
+            e.ActionArguments.ShowViewParameters.CreatedView = detailView;
+            e.Handled = true;
+        }
+    }
+}
+```
+
+**Important:** Do not use `Frame.SetView()` — it disposes the ListView while Blazor is still rendering it. Always use `ShowViewParameters.CreatedView` via `CustomShowNavigationItem`.
 
 ---
 
-## 8. Register Everything in Startup.cs
+## Step 8: Register Everything in Startup.cs
 
-Add the following to `ConfigureServices`, before `AddXaf`:
+Add before `AddXaf`:
 
 ```csharp
-// 1. NpgsqlDataSource with vector support (strip the XAF EFCoreProvider prefix first)
-var pgConnStr = Configuration.GetConnectionString("ConnectionString")!
+// 1. RagDbContext with PGVector
+var ragConnStr = Configuration.GetConnectionString("ConnectionString")!
     .Replace("EFCoreProvider=Postgres;", "");
-var dataSourceBuilder = new NpgsqlDataSourceBuilder(pgConnStr);
+var dataSourceBuilder = new NpgsqlDataSourceBuilder(ragConnStr);
 dataSourceBuilder.UseVector();
 var dataSource = dataSourceBuilder.Build();
 
 services.AddDbContext<RagDbContext>((sp, options) =>
     options.UseNpgsql(dataSource, o => o.UseVector()));
 
-// 2. Configuration sections
+// 2. Configuration
 services.Configure<OpenAiOptions>(Configuration.GetSection("OpenAI"));
 services.Configure<RagOptions>(Configuration.GetSection("Rag"));
 
-// 3. OpenAI clients via Microsoft.Extensions.AI abstractions
-var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY")
-    ?? throw new InvalidOperationException("OPENAI_API_KEY is not set.");
-var openAiClient = new OpenAIClient(apiKey);
+// 3. OpenAI clients
+var openAiOptions = Configuration.GetSection(OpenAiOptions.SectionName).Get<OpenAiOptions>()!;
+var openAiClient = new OpenAIClient(openAiOptions.ApiKey);
 
 IChatClient chatClient = openAiClient
-    .GetChatClient("gpt-4o").AsIChatClient();
+    .GetChatClient(openAiOptions.ChatModel).AsIChatClient();
 services.AddChatClient(chatClient);
 
 IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator = openAiClient
-    .GetEmbeddingClient("text-embedding-3-small").AsIEmbeddingGenerator();
+    .GetEmbeddingClient(openAiOptions.EmbeddingModel).AsIEmbeddingGenerator();
 services.AddSingleton(embeddingGenerator);
 
 // 4. DevExpress AI
-services.AddDevExpressBlazor();
 services.AddDevExpressAI();
 
 // 5. RAG services
@@ -423,34 +592,67 @@ services.AddScoped<RagService>();
 services.AddSingleton<IngestionService>();
 ```
 
-Then in `Configure`, after `UseXaf()`, ensure the `RagDbContext` schema is created:
+After `UseXaf()` in `Configure`, ensure the vector table is created:
 
 ```csharp
 using (var scope = app.ApplicationServices.CreateScope())
 {
     var ragDb = scope.ServiceProvider.GetRequiredService<RagDbContext>();
-    ragDb.Database.EnsureCreated();  // creates knowledge_chunks table + vector extension
+    ragDb.Database.EnsureCreated();
 }
 ```
 
-This is acceptable for a sample. In production, use EF Core migrations instead.
+### Serilog setup (Program.cs)
+
+```csharp
+.UseSerilog((context, configuration) =>
+{
+    configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .WriteTo.Console()
+        .WriteTo.File("logs/xafrag-.log",
+            rollingInterval: RollingInterval.Day,
+            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
+})
+```
 
 ---
 
-## 9. Key Decisions and Trade-offs
+## Step 9: Security Permissions
+
+In your `Updater.cs`, grant the default role access to the new entities:
+
+```csharp
+defaultRole.AddTypePermissionsRecursively<KnowledgeArticle>(
+    SecurityOperations.CRUDAccess, SecurityPermissionState.Allow);
+defaultRole.AddTypePermissionsRecursively<Document>(
+    SecurityOperations.CRUDAccess, SecurityPermissionState.Allow);
+```
+
+---
+
+## Key Decisions and Gotchas
 
 ### Why a separate RagDbContext?
 
-XAF's `XafEFCoreDbContext` is heavily configured: it uses `TypesInfoInitializer`, deferred deletion, optimistic locking, and property access modes that are set up by XAF internally. The `UseVector()` call on the Npgsql data source must be applied at the data source level before the context is built; grafting this onto XAF's context configuration pipeline is fragile and poorly documented. A dedicated `RagDbContext` is simpler, explicit, and owned entirely by your RAG code.
+XAF's EF Core context uses change-tracking proxies, deferred deletion, and optimistic locking. PGVector requires `UseVector()` on the `NpgsqlDataSource` before the context is built. Mixing these in XAF's context pipeline is fragile. A dedicated `RagDbContext` is simpler and fully owned by your RAG code.
 
-### Why fire-and-forget Task.Run instead of Hangfire?
+### Document status tracking
 
-For a tutorial, `Task.Run` with a caught exception and a log entry is the simplest possible background execution. The trade-off: if the process crashes between `ObjectSpace.Committed` firing and the embedding call finishing, the chunk data is silently lost. For production use, replace `IngestionService` with a Hangfire job or a `Channel<T>`-backed hosted service so ingestion is durable and retriable.
+The `IngestionService` runs on a background thread without access to XAF's `ObjectSpace`. It updates the `Document.Status` column via direct SQL through `RagDbContext.Database.ExecuteSqlRawAsync`. This avoids creating an `ObjectSpace` from a background thread (which requires careful security context handling).
 
-### Why pure vector search instead of hybrid?
+### Re-entrancy in ObjectSpace.Committed
 
-Cosine distance on PGVector is a single SQL query and straightforward to reason about. Hybrid search (combining BM25 full-text scores with vector scores, then re-ranking) significantly improves recall for keyword-heavy queries but adds an RRF or cross-encoder re-ranking step. Add it once pure vector search is working and you have a baseline to measure against.
+When the `DocumentIngestionController` sets `Status = Processing` and calls `ObjectSpace.CommitChanges()` inside the `Committed` handler, it fires `Committed` again. Use a boolean `_isCommitting` guard to prevent infinite recursion.
 
-### EF Core 8 compatibility constraints
+### ListView → DetailView redirect for non-persistent objects
 
-`Pgvector.EntityFrameworkCore` version 0.2.x is the last series compatible with EF Core 8. Version 0.3.x requires EF Core 9. XAF 25.2.3 ships with EF Core 8, so stay on `Pgvector.EntityFrameworkCore` 0.2.2 until DevExpress ships an EF Core 9 compatible version of XAF. Similarly, `Npgsql.EntityFrameworkCore.PostgreSQL` must be 8.0.x to match EF Core 8.
+XAF generates a ListView for `RagChatHolder` by default. Do not use `Frame.SetView()` to redirect — it disposes the ListView while Blazor is still rendering, causing an `ObjectDisposedException`. Instead, use `CustomShowNavigationItem` and set `ShowViewParameters.CreatedView`.
+
+### PGVector pg18 volume mount
+
+PGVector pg18 changed its data directory layout. Mount volumes at `/var/lib/postgresql` (not `/var/lib/postgresql/data`) or the container will exit with an error about incompatible data formats.
+
+### Fire-and-forget vs durable jobs
+
+`Task.Run` with exception logging is the simplest background execution. If the process crashes mid-ingestion, chunk data is silently lost. For production, replace with Hangfire or a `Channel<T>`-backed hosted service.

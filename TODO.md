@@ -1,17 +1,5 @@
 # TODO
 
-## P2: Medium
-
-#### RAG-001: Cascade-delete KnowledgeChunks when a Document is deleted
-
-Deleting a Document in XAF leaves its KnowledgeChunks orphaned: chunks live in a separate
-`RagDbContext` with no FK to the XAF `Document` entity, so EF Core cascade delete never fires.
-Orphans waste storage and pollute RAG search results. A manual cleanup on 2026-03-21 removed
-43 orphaned chunks from 5 deleted documents.
-
-Plan: ViewController (or `ObjectSpace.ObjectDeleting` handler) on Document deletion that deletes
-matching `knowledge_chunks` rows by document id.
-
 ## P3: Low
 
 #### RAG-002: Web search integration for RAG chat

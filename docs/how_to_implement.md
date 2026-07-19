@@ -613,6 +613,14 @@ using (var scope = app.ApplicationServices.CreateScope())
 }
 ```
 
+Because the chunks table and the XAF entities live in different `DbContext`s, EF cannot declare
+a relationship between them — so the reference implementation adds real foreign keys with
+`ON DELETE CASCADE` at the database level right after `EnsureCreated()` (idempotent
+`ALTER TABLE ... ADD CONSTRAINT` guarded by `pg_constraint` checks; see `Startup.cs`). Deleting
+a `Document` or `KnowledgeArticle` then removes its chunks automatically, with no orphan-cleanup
+code. This works because XAF hard-deletes these entities: they do not implement
+`IDeferredDeletion`, so XAF's soft-deletion (`GCRecord`) does not apply to them.
+
 ### Serilog setup (Program.cs)
 
 ```csharp

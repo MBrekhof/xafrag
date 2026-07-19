@@ -292,6 +292,32 @@ namespace XafRag.Blazor.Server
             {
                 var ragDb = scope.ServiceProvider.GetRequiredService<RagDbContext>();
                 ragDb.Database.EnsureCreated();
+                // RAG-001: cascade-delete chunks with their parent Document/KnowledgeArticle.
+                // The FK cannot be declared in either EF model (the tables belong to different
+                // DbContexts), so it is added at the database level. Existing orphans are removed
+                // first — the constraint would fail otherwise. On a brand-new database the XAF
+                // tables do not exist yet at this point; the FK is then added on the next start.
+                ragDb.Database.ExecuteSqlRaw("""
+                    DO $$
+                    BEGIN
+                      IF to_regclass('"Documents"') IS NOT NULL AND to_regclass('knowledge_chunks') IS NOT NULL
+                         AND NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_knowledge_chunks_document') THEN
+                        DELETE FROM knowledge_chunks kc
+                          WHERE kc.document_id IS NOT NULL
+                            AND NOT EXISTS (SELECT 1 FROM "Documents" d WHERE d."Id" = kc.document_id);
+                        ALTER TABLE knowledge_chunks ADD CONSTRAINT fk_knowledge_chunks_document
+                          FOREIGN KEY (document_id) REFERENCES "Documents"("Id") ON DELETE CASCADE;
+                      END IF;
+                      IF to_regclass('"KnowledgeArticles"') IS NOT NULL AND to_regclass('knowledge_chunks') IS NOT NULL
+                         AND NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_knowledge_chunks_article') THEN
+                        DELETE FROM knowledge_chunks kc
+                          WHERE kc.knowledge_article_id IS NOT NULL
+                            AND NOT EXISTS (SELECT 1 FROM "KnowledgeArticles" a WHERE a."Id" = kc.knowledge_article_id);
+                        ALTER TABLE knowledge_chunks ADD CONSTRAINT fk_knowledge_chunks_article
+                          FOREIGN KEY (knowledge_article_id) REFERENCES "KnowledgeArticles"("Id") ON DELETE CASCADE;
+                      END IF;
+                    END $$;
+                    """);
             }
             app.UseEndpoints(endpoints =>
             {

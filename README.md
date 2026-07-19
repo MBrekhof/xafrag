@@ -12,12 +12,12 @@ XafRag is a tutorial and reference implementation showing how to add Retrieval-A
 
 | Layer | Technology |
 |---|---|
-| Framework | .NET 8, DevExpress XAF 25.2.3 |
-| UI | Blazor Server, DevExpress DxAIChat 25.2.4 |
-| ORM | EF Core 8 |
+| Framework | .NET 10, DevExpress XAF 26.1.3 |
+| UI | Blazor Server, DevExpress DxAIChat 26.1.3 |
+| ORM | EF Core 10 |
 | Vector store | PostgreSQL 18 + PGVector |
 | AI | OpenAI `text-embedding-3-small` (embeddings), `gpt-4o` (chat) |
-| AI abstractions | `Microsoft.Extensions.AI` 9.7.1 |
+| AI abstractions | `Microsoft.Extensions.AI` 10.8.0 |
 | Document parsing | DevExpress Document Processor (PDF, DOCX), plain text (TXT, MD) |
 | Logging | Serilog (console + rolling file) |
 
@@ -25,9 +25,9 @@ XafRag is a tutorial and reference implementation showing how to add Retrieval-A
 
 ## Prerequisites
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (for PostgreSQL + PGVector)
-- DevExpress license (25.2.x) with the DevExpress NuGet feed configured
+- DevExpress license (26.1.x) with the DevExpress NuGet feed configured
 - OpenAI API key
 
 ---

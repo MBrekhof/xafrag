@@ -8,7 +8,7 @@ For the complete source code of every file mentioned here, refer to this reposit
 
 ## Prerequisites
 
-- .NET 8 SDK with a working XAF Blazor Server project (DevExpress 25.2.x)
+- .NET 10 SDK with a working XAF Blazor Server project (DevExpress 26.1.x)
 - Docker (for PostgreSQL + PGVector)
 - An OpenAI API key
 - DevExpress NuGet feed configured
@@ -58,12 +58,12 @@ docker compose up -d
 ```xml
 <PackageReference Include="Pgvector" Version="0.3.2" />
 <PackageReference Include="Pgvector.EntityFrameworkCore" Version="0.3.0" />
-<PackageReference Include="Microsoft.Extensions.AI" Version="9.7.1" />
-<PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.7.1-preview.1.25365.4" />
-<PackageReference Include="DevExpress.AIIntegration.Blazor.Chat" Version="25.2.4" />
-<PackageReference Include="DevExpress.Document.Processor" Version="25.2.3" />
-<PackageReference Include="Markdig" Version="0.42.0" />
-<PackageReference Include="HtmlSanitizer" Version="8.1.870" />
+<PackageReference Include="Microsoft.Extensions.AI" Version="10.8.0" />
+<PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.8.0" />
+<PackageReference Include="DevExpress.AIIntegration.Blazor.Chat" Version="26.1.3" />
+<PackageReference Include="DevExpress.Document.Processor" Version="26.1.3" />
+<PackageReference Include="Markdig" Version="1.3.2" />
+<PackageReference Include="HtmlSanitizer" Version="9.0.892" />
 <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
 <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
 ```
@@ -395,10 +395,10 @@ The Razor component wraps `DxAIChat` with manual message handling (bypassing the
           HeaderText="Knowledge Base Assistant"
           UseStreaming="false"
           ResponseContentFormat="ResponseContentFormat.Markdown"
-          MessageSent="OnMessageSent">
+          MessageSending="OnMessageSending">
     <MessageContentTemplate>
         <div class="rag-chat-content">
-            @ToHtml(context.Content)
+            @ToHtml(context.Text)
         </div>
     </MessageContentTemplate>
     <EmptyMessageAreaTemplate>
@@ -412,12 +412,23 @@ The Razor component wraps `DxAIChat` with manual message handling (bypassing the
 @code {
     private readonly HtmlSanitizer _sanitizer = new();
 
-    private async Task OnMessageSent(MessageSentEventArgs args)
+    private async Task OnMessageSending(MessageSendingEventArgs args)
     {
-        var sb = new System.Text.StringBuilder();
-        await foreach (var chunk in RagService.AskAsync(args.Content, ct: args.CancellationToken))
-            sb.Append(chunk);
-        await args.Chat.SendMessage(sb.ToString(), ChatRole.Assistant);
+        // Cancel built-in delivery: the RAG pipeline replaces the component's AI service.
+        args.Cancel = true;
+        await args.Chat.AppendMessageAsync(args.Text, ChatRole.User);
+        await args.Chat.ShowLoadingIndicatorAsync("Searching knowledge base...");
+        try
+        {
+            var sb = new System.Text.StringBuilder();
+            await foreach (var chunk in RagService.AskAsync(args.Text, ct: args.CancellationToken))
+                sb.Append(chunk);
+            await args.Chat.AppendMessageAsync(sb.ToString(), ChatRole.Assistant);
+        }
+        finally
+        {
+            await args.Chat.HideLoadingIndicatorAsync();
+        }
     }
 
     private MarkupString ToHtml(string markdown)

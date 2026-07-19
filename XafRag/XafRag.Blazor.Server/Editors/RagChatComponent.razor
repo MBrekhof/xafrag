@@ -9,10 +9,10 @@
           HeaderText="Knowledge Base Assistant"
           UseStreaming="false"
           ResponseContentFormat="ResponseContentFormat.Markdown"
-          MessageSent="OnMessageSent">
+          MessageSending="OnMessageSending">
     <MessageContentTemplate>
         <div class="rag-chat-content">
-            @ToHtml(context.Content)
+            @ToHtml(context.Text)
         </div>
     </MessageContentTemplate>
     <EmptyMessageAreaTemplate>
@@ -42,17 +42,26 @@
 @code {
     private readonly HtmlSanitizer _sanitizer = new();
 
-    private async Task OnMessageSent(MessageSentEventArgs args)
+    private async Task OnMessageSending(MessageSendingEventArgs args)
     {
-        var question = args.Content;
-        var responseBuilder = new System.Text.StringBuilder();
-
-        await foreach (var chunk in RagService.AskAsync(question, ct: args.CancellationToken))
+        // The RAG pipeline replaces the component's built-in AI service delivery.
+        args.Cancel = true;
+        var question = args.Text;
+        await args.Chat.AppendMessageAsync(question, Microsoft.Extensions.AI.ChatRole.User);
+        await args.Chat.ShowLoadingIndicatorAsync("Searching knowledge base...");
+        try
         {
-            responseBuilder.Append(chunk);
+            var responseBuilder = new System.Text.StringBuilder();
+            await foreach (var chunk in RagService.AskAsync(question, ct: args.CancellationToken))
+            {
+                responseBuilder.Append(chunk);
+            }
+            await args.Chat.AppendMessageAsync(responseBuilder.ToString(), Microsoft.Extensions.AI.ChatRole.Assistant);
         }
-
-        await args.Chat.SendMessage(responseBuilder.ToString(), Microsoft.Extensions.AI.ChatRole.Assistant);
+        finally
+        {
+            await args.Chat.HideLoadingIndicatorAsync();
+        }
     }
 
     private MarkupString ToHtml(string markdown)

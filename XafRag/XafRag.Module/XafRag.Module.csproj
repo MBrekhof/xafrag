@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <CheckEolTargetFramework>false</CheckEolTargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Deterministic>false</Deterministic>
     <AssemblyVersion>1.0.*</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
@@ -15,34 +14,26 @@
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp" Version="25.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.CodeAnalysis" Version="25.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="25.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.EFCore" Version="25.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Notifications" Version="25.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Office" Version="25.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.ReportsV2" Version="25.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Security" Version="25.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation" Version="25.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.ViewVariantsModule" Version="25.2.3" />
-    <PackageReference Include="DevExpress.Persistent.Base" Version="25.2.3" />
-    <PackageReference Include="DevExpress.Persistent.BaseImpl.EFCore" Version="25.2.3" />
-    <PackageReference Include="Azure.Identity" Version="1.17.1" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.2" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.10.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.10.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.10.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.10.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.18" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="8.0.18" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.18" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.18" >
+    <PackageReference Include="DevExpress.ExpressApp" Version="26.1.3" />
+    <PackageReference Include="DevExpress.ExpressApp.CodeAnalysis" Version="26.1.3" />
+    <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="26.1.3" />
+    <PackageReference Include="DevExpress.ExpressApp.EFCore" Version="26.1.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Notifications" Version="26.1.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Office" Version="26.1.3" />
+    <PackageReference Include="DevExpress.ExpressApp.ReportsV2" Version="26.1.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Security" Version="26.1.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation" Version="26.1.3" />
+    <PackageReference Include="DevExpress.ExpressApp.ViewVariantsModule" Version="26.1.3" />
+    <PackageReference Include="DevExpress.Persistent.Base" Version="26.1.3" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl.EFCore" Version="26.1.3" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.19.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="10.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.10" >
       <PrivateAssets>none</PrivateAssets>
       <IncludeAssets>all</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.8" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
     <PackageReference Include="Pgvector" Version="0.3.2" />
-    <PackageReference Include="Pgvector.EntityFrameworkCore" Version="0.2.2" />
+    <PackageReference Include="Pgvector.EntityFrameworkCore" Version="0.3.0" />
   </ItemGroup>
 </Project>
